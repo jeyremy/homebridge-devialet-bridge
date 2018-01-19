@@ -6,7 +6,7 @@ var Service, Characteristic;
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
-    homebridge.registerAccessory("homebridge-marantz-volume", "marantz-volume", ReceiverVolume);
+    homebridge.registerAccessory("homebridge-devialet-bridge", "devialet-bridge", ReceiverVolume);
 }
 
 function ReceiverVolume(log, config) {
@@ -19,8 +19,9 @@ function ReceiverVolume(log, config) {
     this.controlPower = !!config['controlPower']; // default to false, and make sure its a bool
     this.controlMute = !!config['controlMute'] && this.controlPower === false;
     this.mapMaxVolumeTo100 = !!config['mapMaxVolumeTo100'];
+    this.lastVolume = 0;
     
-    //cap maxVolume.  Denon/Marantz percentage maxes at 98 in receiver settings
+    //cap maxVolume.  Devialet percentage maxes at 98 in receiver settings
     if(this.maxVolume > 98)
         this.maxVolume = 98;
     
@@ -56,50 +57,67 @@ ReceiverVolume.prototype.getStatus = function(callback) {
     }.bind(this));
 }
 
-ReceiverVolume.prototype.setControl = function (control, command, callback) {
-    var controlUrl = `http://${this.host}/goform/formiPhoneApp${control}.xml?${this.zone}+${command}`;
+ReceiverVolume.prototype.setControl = function (control, val, callback) {
+   /* var controlUrl = `http://${this.host}/goform/formiPhoneApp${control}.xml?${this.zone}+${command}`;
     request.get(controlUrl, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             callback(null);
         } else {
             callback(error);
         }
-    }.bind(this));
-}
+    }.bind(this));*/
 
-ReceiverVolume.prototype.getPowerOn = function(callback) {
-    if (this.controlPower) {
-        this.getStatus(function(status) {
-            var powerState = status ? (status.Power[0].value[0] === "ON" ? 1 : 0) : 0;
-            this.log("Receiver %s Volume power state is %s", this.zoneName, powerState);
-            callback(null, powerState);
-        }.bind(this));
-    } else if (this.controlMute) {
-        this.getStatus(function(status) {
-            var powerState = status ? (status.Mute[0].value[0] === "on" ? 0 : 1) : 0;
-            this.log("Receiver %s Volume state is %s", this.zoneName, powerState);
-            callback(null, powerState);
-        }.bind(this));
-    } else {
-        this.log("Receiver %s Volume power state is %s", this.zoneName, this.fakePowerState);
-        callback(null, this.fakePowerState);
+   //c'est ici qu'on envoi le volume
+    if(!this.ip)
+    {
+        var status =  "Sorry: Speakers not found yet. Try later..";
     }
-}
+    else
+    {
+        var status = "Set Volume to: "+val+"%";
+        var xml = '<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">'+
+            '<s:Body>'+
+            '<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:2">'+
+            '<InstanceID>0</InstanceID>'+
+            '<Channel>Master</Channel>'+
+            '<DesiredVolume>'+val+'</DesiredVolume>'+
+            '</u:SetVolume>'+
+            '</s:Body>'+
+            '</s:Envelope>';
 
-ReceiverVolume.prototype.setPowerOn = function(powerOn, callback) {
-    if (this.controlPower) {
-        var command = powerOn ? 'PowerOn' : 'PowerStandby';
-        this.log("Set receiver %s volume power state to %s", this.zoneName, command);
-        this.setControl('Power', command, callback);
-    } else if (this.controlMute) {
-        var command = powerOn ? 'MuteOff' : 'MuteOn';
-        this.log("Set receiver %s volume state to %s", this.zoneName, command);
-        this.setControl('Mute', command, callback);
-    } else {
-        this.fakePowerState = powerOn ? 1 : 0;
-        this.log("Set receiver %s volume power state to %s", this.zoneName, this.fakePowerState);
-        callback(null);
+        var http_options = {
+            hostname: this.ip,
+            port: 8080, //a vérifier car pas sur.
+            path: '/Control/LibRygelRenderer/RygelRenderingControl',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'SOAPACTION': 'urn:schemas-upnp-org:service:RenderingControl:2#SetVolume',
+                'Content-Length': xml.length
+            }
+        }
+
+        var req = http.request(http_options, (res) => {
+            res.setEncoding('utf8');
+            if (res.statusCode == "200"){
+                this.lastVolume = val;
+                callback(null);
+            }
+
+        });
+        req.on('error', (e) => {
+            console.log(`problem with request: ${e.message}`);
+            callback(e);
+        });
+
+        req.bind(this); //not sure.
+        req.write(xml);
+        req.end();
+        console.log(status);
     }
+ }
+
+
 }
 
 ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
@@ -112,7 +130,7 @@ ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
         var newVolume = Math.min(newLevel, this.maxVolume);
     }
     
-    //cap newVolume.  //Denon/Marantz percentage maxes at 98 in receiver settings
+    //cap newVolume.  //Devialet percentage maxes at 98 in receiver settings
     if(newVolume > 98){
         newVolume = 98;
     }
@@ -127,7 +145,7 @@ ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
 }
 
 ReceiverVolume.prototype.getBrightness = function(callback) {
-    this.getStatus(function(status) {
+   /* this.getStatus(function(status) {
         
         if(status){
             var volume = parseInt(status.MasterVolume[0].value[0]) + 80;
@@ -144,20 +162,17 @@ ReceiverVolume.prototype.getBrightness = function(callback) {
             callback(null);
         }
         
-    }.bind(this));
+    }.bind(this));*/
+
+    callback(null, this.lastVolume); //en attendant mieux
+
 }
 
 ReceiverVolume.prototype.getServices = function() {
     var lightbulbService = new Service.Lightbulb(this.name);
 
     lightbulbService
-        .getCharacteristic(Characteristic.On)
-        .on('get', this.getPowerOn.bind(this))
-        .on('set', this.setPowerOn.bind(this));
-
-    lightbulbService
         .addCharacteristic(new Characteristic.Brightness())
-        .on('get', this.getBrightness.bind(this))
         .on('set', this.setBrightness.bind(this));
 
     return [lightbulbService];

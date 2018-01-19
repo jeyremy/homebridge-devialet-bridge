@@ -1,18 +1,18 @@
 {
   "name": "homebridge-marantz-volume",
   "version": "1.3.0",
-  "description": "Homebridge plugin to control Denon or Marantz receiver volume with Siri commands",
+  "description": "Homebridge plugin to control Devialet receiver volume with Siri commands",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/robertvorthman/homebridge-marantz-volume.git"
+    "url": "git://github.com/jeyremy/homebridge-devialet-bridge.git"
   },
   "keywords": [
     "homebridge",
     "homebridge-plugin",
     "volume",
-    "marantz",
-    "denon",
+    "devialet",
+    "bridge",
     "siri"
   ],
   "engines": {
@@ -26,7 +26,7 @@
   "author": "Robert Vorthman",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/robertvorthman/homebridge-marantz-volume/issues"
+    "url": "https://github.com/jeyremy/homebridge-devialet-bridge/issues"
   },
-  "homepage": "https://github.com/robertvorthman/homebridge-marantz-volume#readme"
+  "homepage": "https://github.com/jeyremy/homebridge-devialet-bridge#readme"
 }

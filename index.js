@@ -44,6 +44,9 @@ function ReceiverVolume(log, config) {
 
 
 client.on('response', function inResponse(headers, code, rinfo) {
+	
+	     console.log("Found something at "+rinfo.address);
+
 	if(rinfo.address == this.host)
 	{
 		actualDevice["host"] = parseUri(headers.LOCATION).host;
@@ -53,6 +56,8 @@ client.on('response', function inResponse(headers, code, rinfo) {
 
 function searchSpeaker()
 {
+     console.log("Seraching for Devialet bridge");
+
 	client.search('urn:schemas-upnp-org:service:RenderingControl:2');
 	setTimeout(function() {
   searchSpeaker();

@@ -44,7 +44,7 @@ function ReceiverVolume(log, config) {
 
 
 client.on('response', function inResponse(headers, code, rinfo) {
-	if(rinfo.address == devialet_ipaddress)
+	if(rinfo.address == this.host)
 	{
 		actualDevice["host"] = parseUri(headers.LOCATION).host;
 		actualDevice["port"] = parseUri(headers.LOCATION).port;

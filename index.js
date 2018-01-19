@@ -115,7 +115,7 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
         req.end();
         console.log(status);
     }
- }
+
 
 
 }

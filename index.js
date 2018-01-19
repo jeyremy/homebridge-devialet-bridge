@@ -58,7 +58,9 @@ function searchSpeaker()
 {
      console.log("Seraching for Devialet bridge");
 
-	client.search('urn:schemas-upnp-org:service:RenderingControl:2');
+	//client.search('urn:schemas-upnp-org:service:RenderingControl:2');
+	    client.search('ssdp:all');
+
 	setTimeout(function() {
   searchSpeaker();
 	}, discoverInterval);	

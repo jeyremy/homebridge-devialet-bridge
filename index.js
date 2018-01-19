@@ -3,6 +3,8 @@ var parseString = require('xml2js').parseString;
 
 var Service, Characteristic;
 
+http = require('http'), url = require('url'), request = require('request');
+
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
@@ -68,13 +70,14 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
     }.bind(this));*/
 
    //c'est ici qu'on envoi le volume
-    if(!this.ip)
+    if(!this.host)
     {
         var status =  "Sorry: Speakers not found yet. Try later..";
     }
     else
     {
         var status = "Set Volume to: "+val+"%";
+
         var xml = '<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">'+
             '<s:Body>'+
             '<u:SetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:2">'+
@@ -86,8 +89,8 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
             '</s:Envelope>';
 
         var http_options = {
-            hostname: this.ip,
-            port: 8080, //a vérifier car pas sur.
+            hostname: this.host,
+            port: 8000, //a vérifier car pas sur.
             path: '/Control/LibRygelRenderer/RygelRenderingControl',
             method: 'POST',
             headers: {
@@ -99,22 +102,25 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
 
         var req = http.request(http_options, (res) => {
             res.setEncoding('utf8');
-            if (res.statusCode == "200"){
+            console.log("statuscode  == "+res.statusCode)    ;
+            if ( res.statusCode == 200) {
                 this.lastVolume = val;
                 callback(null);
+            } else {
+              callback(res.statusCode);
             }
-
         });
         req.on('error', (e) => {
             console.log(`problem with request: ${e.message}`);
             callback(e);
         });
 
-        req.bind(this); //not sure.
+      //  req.bind(this); //not sure.
         req.write(xml);
         req.end();
         console.log(status);
     }
+    console.log(status);
 
 
 
@@ -122,7 +128,7 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
 
 ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
 
-    if(this.mapMaxVolumeTo100){
+  /*  if(this.mapMaxVolumeTo100){
         var volumeMultiplier = this.maxVolume/100;
         var newVolume = volumeMultiplier * newLevel;
     }else{
@@ -134,14 +140,14 @@ ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
     if(newVolume > 98){
         newVolume = 98;
     }
-
-    //convert volume percentage to relative volume
+*/
+    /*//convert volume percentage to relative volume
     var relativeVolume = (2 * (newVolume - 80)).toFixed(0) / 2.0;
 
     //cap between -80 and 0
-    relativeVolume = Math.max(-80.0, Math.min(0.0, relativeVolume));
+    relativeVolume = Math.max(-80.0, Math.min(0.0, relativeVolume));*/
     
-    this.setControl('Volume', relativeVolume, callback);
+    this.setControl('Volume', newLevel, callback);
 }
 
 ReceiverVolume.prototype.getBrightness = function(callback) {

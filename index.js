@@ -2,8 +2,10 @@ var request = require('request');
 var parseString = require('xml2js').parseString;
 
 var Service, Characteristic;
-
+actualDevice = []; 
+var ssdp = require('node-ssdp').Client, client = new ssdp();
 http = require('http'), url = require('url'), request = require('request');
+var discoverInterval = 10000; //milliseconds
 
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
@@ -32,17 +34,34 @@ function ReceiverVolume(log, config) {
         callback(new Error('No host/IP defined.'));
         return;
     }
-
-    if (this.zone < 1 && this.zone > 2) {
-        this.log.warn('Zone number is not recognized (must be 1 or 2); assuming zone 1');
-        this.zone = 1;
-    }
-
-    this.zoneName = this.zone === 1 ? "MainZone" : "Zone2";
+      searchSpeaker();
 
     if (!this.controlPower) {
         this.fakePowerState = 1; //default to on so that brightness will update in HomeKit apps
     }
+    
+}
+
+
+client.on('response', function inResponse(headers, code, rinfo) {
+	if(rinfo.address == devialet_ipaddress)
+	{
+		actualDevice["host"] = parseUri(headers.LOCATION).host;
+		actualDevice["port"] = parseUri(headers.LOCATION).port;
+	}
+})
+
+function searchSpeaker()
+{
+	client.search('urn:schemas-upnp-org:service:RenderingControl:2');
+	setTimeout(function() {
+  searchSpeaker();
+	}, discoverInterval);	
+	
+	if(actualDevice["host"])
+	{
+		console.log("Devialet bridge found at: "+actualDevice["host"]+":"+actualDevice["port"]);
+	}	
 }
 
 ReceiverVolume.prototype.getStatus = function(callback) {
@@ -70,10 +89,10 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
     }.bind(this));*/
 
    //c'est ici qu'on envoi le volume
-    if(!this.host)
-    {
-        var status =  "Sorry: Speakers not found yet. Try later..";
-    }
+   if(!actualDevice["host"])
+	{
+		var status =  "Sorry: Speakers not found yet. Try later..";
+	}
     else
     {
         var status = "Set Volume to: "+val+"%";
@@ -89,8 +108,8 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
             '</s:Envelope>';
 
         var http_options = {
-            hostname: this.host,
-            port: 8000, //a vérifier car pas sur.
+            hostname: actualDevice["host"],
+            port: actualDevice["port"], //a vérifier car pas sur.
             path: '/Control/LibRygelRenderer/RygelRenderingControl',
             method: 'POST',
             headers: {
@@ -127,26 +146,6 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
 }
 
 ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
-
-  /*  if(this.mapMaxVolumeTo100){
-        var volumeMultiplier = this.maxVolume/100;
-        var newVolume = volumeMultiplier * newLevel;
-    }else{
-        //cap to max volume set in homebridge config.json
-        var newVolume = Math.min(newLevel, this.maxVolume);
-    }
-    
-    //cap newVolume.  //Devialet percentage maxes at 98 in receiver settings
-    if(newVolume > 98){
-        newVolume = 98;
-    }
-*/
-    /*//convert volume percentage to relative volume
-    var relativeVolume = (2 * (newVolume - 80)).toFixed(0) / 2.0;
-
-    //cap between -80 and 0
-    relativeVolume = Math.max(-80.0, Math.min(0.0, relativeVolume));*/
-    
     this.setControl('Volume', newLevel, callback);
 }
 
@@ -183,3 +182,35 @@ ReceiverVolume.prototype.getServices = function() {
 
     return [lightbulbService];
 }
+
+
+function parseUri (str) {
+	var	o   = parseUri.options,
+		m   = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
+		uri = {},
+		i   = 14;
+
+	while (i--) uri[o.key[i]] = m[i] || "";
+
+	uri[o.q.name] = {};
+	uri[o.key[12]].replace(o.q.parser, function ($0, $1, $2) {
+		if ($1) uri[o.q.name][$1] = $2;
+	});
+
+	return uri;
+};
+
+parseUri.options = {
+	strictMode: false,
+	key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
+	q:   {
+		name:   "queryKey",
+		parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+	},
+	parser: {
+		strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+		loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+	}
+};
+
+

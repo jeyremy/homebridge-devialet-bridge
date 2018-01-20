@@ -25,13 +25,13 @@ Example:
   
   ```
 "accessories": [
-  {
-    "accessory":      "devialet-bridge",
-    "name":           "Phantom Living Room",
-    "host":           "192.168.1.15"
-    "maxVolume":      50
-  }
-]
+     {
+       "accessory":      "devialet-bridge",
+       "name":           "Phantom Living Room",
+       "host":           "192.168.1.15"
+       "maxVolume":      50
+     }
+  ]
 ```
 
 
@@ -43,6 +43,8 @@ Example:
  ` If you are interested in setting the volume of your Phantom(s) with Siri, Only remember to not tell Siri "Set the light in the Living room to 100 %" ;)
 
  `` We also suggest, in homekit, to put your Devialet Light switch in a different Room in order to not have bad surprise setting something like "Turn on all light in the Living Room" :)
+
+# Credits
 
  `` homebridge-devialet-bridge was written by Jeremy and the contribution of Steven
 

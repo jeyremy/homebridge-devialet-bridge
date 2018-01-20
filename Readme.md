@@ -1,98 +1,49 @@
-# homebridge-marantz-volume
-Marantz Receiver plugin for homebridge: https://github.com/nfarina/homebridge
+# Homebridge-Phantom-Devialet-Bridge
 
-This plugin allows you to control your Denon or Marantz receiver volume with Siri, with commands like "set the stereo volume to 25%".  Your receiver will appear as a light bulb in HomeKit, this is so the brightness characteristic of a light bulb can be leveraged as a way to set the receiver volume by using Siri.
-
-Unlike other light bulb HomeKit accessories, this plugin ignores power state commands (on/off) by default, this is to avoid having your receiver turn off if you tell Siri to "turn off all the lights".  If you want to control the power state of the receiver rather than ignoring it, set the `"controlPower":true` property in the configuration.
-
-This plugin also allows you to register the "main zone" and "zone 2" of your receiver as independent accessories within HomeKit, if your receiver is multi-zone.
-
-## Siri
-
-Try these Siri commands
-
-* Set the stereo volume to 25%
-* Set the living room to 25%
-* Increase/Decrease the stereo volume by 5%
-
-If those Siri commands do not work, try saying "stereo volume brightness", for example "set the stereo volume brightness to 25%"
+homebridge-plugin for Devialet Phantom with Dialog. Inspire from the initial homebridge-marantz-volume homebridge plugin ( https://github.com/stfnhmplr/homebridge-marantz-volume ) and phantom-bridge ( https://github.com/da2001/phantom-bridge ): Thanks to them, we'll have just a few work to do in order to manage Phantom devialet Volume via Dialog.
 
 
-![Adjust Stereo Volume Using Siri](https://cloud.githubusercontent.com/assets/4665046/16897532/158d983c-4b82-11e6-984c-11d74e00f46e.gif)
+Installation
 
-## watchOS 3 Home App
-Use the Digital Crown to adjust volume with Apple's Home app
+Follow the instruction in NPM for the homebridge server installation. The plugin is published through NPM and should be installed "globally" by typing:
 
-![Adjust Stereo Volume Using Apple Watch Crown](https://cloud.githubusercontent.com/assets/4665046/16897807/3909c1ba-4b8b-11e6-81d6-f38dbd2aa46c.gif)
+sudo npm install -g homebridge-devialet-bridge
 
-## iOS 10 Control Center
-iOS 10 adds HomeKit shortcuts to the iOS Control Center, so you can adjust the volume without even unlocking your phone.
 
-![Adjust Stereo Volume Using Control Center](https://cloud.githubusercontent.com/assets/4665046/16897533/1590c1c4-4b82-11e6-8779-322ad15c31ff.gif)
+Configuration
 
-# Installation
+config.json
 
-1. Install homebridge: npm install -g homebridge
-2. Install this plugin globally: npm install -g homebridge-marantz-volume
-3. Update your homebridge config file.  Example below:
+Example:
 
-# Configuration
-
-Add as an accessory by editing the homebridge config.json file.
-
-## Simple Example
-
-```
-"accessories": [
-  {
-    "accessory":      "marantz-volume",
-    "name":           "Stereo Volume",
-    "host":           "192.168.1.15"
-  }
-]
-```
-
-## Multiple Zones Example
-
-If your receiver supports a 2nd zone, add
-the plugin a second time with `"zone":2` in the accessory properties, the same host, and a different name.
-
-Configuration sample:
-
-```
-"accessories": [
-  {
-    "accessory":      "marantz-volume",
-    "name":           "Stereo Volume",
-    "host":           "192.168.1.15",
-    "maxVolume":      50
+{
+  "bridge": {
+      "name": "Homebridge",
+      "username": "CC:22:3D:E3:CE:51",
+      "port": 51826,
+      "pin": "031-45-154"
   },
-  {
-    "accessory":      "marantz-volume",
-    "name":           "Outside Volume",
-    "host":           "192.168.1.15",
-    "maxVolume":      80,
-    "zone":           2,
-    "controlPower":   true
-  },
-  ...
-]
+  "description": "This is an example configuration file for homebridge Devialet Phantom Dialog plugin, host is meant to specify the Ip adress of your dialog",
+  "hint": "Always paste into jsonlint.com validation page before starting your homebridge, saves a lot of frustration",
+  
+  "accessories": [
+      {
+          "accessory": "devialet-bridge",
+          "name": "Phantom",
+          "host": "192.168.1.99",
+          "maxVolume": 50
+        
+      }
+  ]
+}
 
-```
-In the above example, the receiver has two zones, the volume control works for both zones (named "Stereo Volume" and "Outside Volume"),
-and the power control works is ignored for the main zone and is enabled for the second zone.
+notes
 
-## Additional Configuration Details
+# You have to specify the Ip adress of your Dialog ( "Host" ).
+# In order to the Plugin to work, please enable in the Spark application UPNP on your Dialog.
 
-The option `maxVolume` defaults to 70 unless otherwise specified as a values between 0 and 100.
+If you are interested in setting the volume of your Phantom(s) with Siri, Only remember to not tell Siri "Set the light in the Living room to 100 %" ;)
+We also suggest, in homekit, to put your Devialet Light switch in a different Room in order to not have bad surprise setting something like "Turn on all light in the Living Room" :)
 
-Setting `"mapMaxVolumeTo100":true` will remap the volume percentages that appear in the Home app so that the configured maxVolume will appear as 100% in the Home app.  For example, if the maxVolume is 70%, then setting the stereo volume brightness to 50% would set the receiver's volume to 35%.  Adjusting the stereo volume knob to 70 will appear as 100% brightness in the Home app.  This option could confuse some users to it defaults to off `false`, but it does give the user finer volume control especially when sliding the brightness slider up and down in the Home app.
-
-The `"controlMute":true` option will change the on/off switch behavior to control the receiver's mute status. If `"controlPower":true` is set, this option will be ignored.
-
-# Special Thanks
-This plugin was built upon code from the following homebridge plugins
-
-https://www.npmjs.com/package/homebridge-fakebulb by schemish
-
-https://www.npmjs.com/package/homebridge-denon by stfnhmplr
+homebridge-devialet-bridge was written by Jeremy and the contribution of Steven 
+homebridge-marantz-volume was written by Robert Vorthman (thanks!) phantom-bridge was written by DA2001 ( thanks ! )

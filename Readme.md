@@ -18,25 +18,24 @@ config.json
 Example:
 
 {
-  "bridge": {
-      "name": "Homebridge",
+    "bridge": {
+    "name": "Homebridge",
       "username": "CC:22:3D:E3:CE:51",
       "port": 51826,
       "pin": "031-45-154"
-  },
+      },
   "description": "This is an example configuration file for homebridge Devialet Phantom Dialog plugin, 
   host is meant to specify the Ip adress of your dialog",
-  
   "hint": "Always paste into jsonlint.com validation page before starting your homebridge, saves a lot of frustration",
   
   "accessories": [
-      {
-          "accessory": "devialet-bridge",
-          "name": "Phantom",
-          "host": "192.168.1.99",
-          "maxVolume": 50
-      }
-  ]
+     {
+     "accessory": "devialet-bridge",
+     "name": "Phantom",
+     "host": "192.168.1.99",
+     "maxVolume": 50
+     }
+   ]
 }
 
 # notes
@@ -45,7 +44,9 @@ Example:
 # In order to the Plugin to work, please enable in the Spark application UPNP on your Dialog.
 
 If you are interested in setting the volume of your Phantom(s) with Siri, Only remember to not tell Siri "Set the light in the Living room to 100 %" ;)
+
 We also suggest, in homekit, to put your Devialet Light switch in a different Room in order to not have bad surprise setting something like "Turn on all light in the Living Room" :)
 
-homebridge-devialet-bridge was written by Jeremy and the contribution of Steven 
+homebridge-devialet-bridge was written by Jeremy and the contribution of Steven
+
 homebridge-marantz-volume was written by Robert Vorthman (thanks!) phantom-bridge was written by DA2001 ( thanks ! )

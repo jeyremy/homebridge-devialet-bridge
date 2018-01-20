@@ -3,15 +3,16 @@
 homebridge-plugin for Devialet Phantom with Dialog. Inspire from the initial homebridge-marantz-volume homebridge plugin ( https://github.com/stfnhmplr/homebridge-marantz-volume ) and phantom-bridge ( https://github.com/da2001/phantom-bridge ): Thanks to them, we'll have just a few work to do in order to manage Phantom devialet Volume via Dialog.
 
 
-Installation
+# Installation
 
 Follow the instruction in NPM for the homebridge server installation. The plugin is published through NPM and should be installed "globally" by typing:
 
 sudo npm install -g homebridge-devialet-bridge
 
 
-Configuration
+# Configuration
 
+Add as an accessory by editing the homebridge config.json file.
 config.json
 
 Example:
@@ -23,7 +24,9 @@ Example:
       "port": 51826,
       "pin": "031-45-154"
   },
-  "description": "This is an example configuration file for homebridge Devialet Phantom Dialog plugin, host is meant to specify the Ip adress of your dialog",
+  "description": "This is an example configuration file for homebridge Devialet Phantom Dialog plugin, 
+  host is meant to specify the Ip adress of your dialog",
+  
   "hint": "Always paste into jsonlint.com validation page before starting your homebridge, saves a lot of frustration",
   
   "accessories": [
@@ -32,12 +35,11 @@ Example:
           "name": "Phantom",
           "host": "192.168.1.99",
           "maxVolume": 50
-        
       }
   ]
 }
 
-notes
+# notes
 
 # You have to specify the Ip adress of your Dialog ( "Host" ).
 # In order to the Plugin to work, please enable in the Spark application UPNP on your Dialog.

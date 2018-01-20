@@ -1,10 +1,10 @@
 # Homebridge-Devialet-Bridge
 
 homebridge-plugin for Devialet Phantom with Dialog. 
- `` Inspire from the initial homebridge-marantz-volume homebridge plugin ( https://github.com/stfnhmplr/homebridge-marantz-volume ) and phantom-bridge ( https://github.com/da2001/phantom-bridge ): Thanks to them, we'll have just a few work to do in order to manage Phantom devialet Volume via Dialog.
+ `` Inspire from the initial homebridge-marantz-volume homebridge plugin ( https://github.com/stfnhmplr/homebridge-marantz-volume ) and phantom-bridge ( https://github.com/da2001/phantom-bridge ): Thanks to them, we'll have just a few work to do in order to manage Phantom devialet Volume via Dialog. `` 
  
 # Prerequisite 
-1) install HomeBridge : ''sudo npm install -g homebridge
+1) install HomeBridge :  `` sudo npm install -g homebridge `` 
 2) In order to the Plugin to work, please enable in the Spark application UPNP on your Dialog. please follow this link : 
 https://help.devialet.com/hc/en-us/articles/115004436969-How-Can-I-Use-UPNP-with-my-Phantom-
 
@@ -12,7 +12,7 @@ https://help.devialet.com/hc/en-us/articles/115004436969-How-Can-I-Use-UPNP-with
 
 Follow the instruction in NPM for the homebridge server installation. The plugin is published through NPM and should be installed "globally" by typing:
  
-''sudo npm install -g homebridge-devialet-bridge
+ `` sudo npm install -g homebridge-devialet-bridge `` 
  
 
 # Configuration
@@ -22,20 +22,18 @@ config.json
 
 Example:
 
-
+  ```
   "description": "This is an example configuration file for homebridge Devialet Phantom Dialog plugin, 
   host is meant to specify the Ip adress of your dialog",
   "hint": "Always paste into jsonlint.com validation page before starting your homebridge, saves a lot of frustration",
-  
-  ```
-"accessories": [
-     {
-       "accessory":      "devialet-bridge",
-       "name":           "Phantom Living Room",
-       "host":           "192.168.1.15"
-       "maxVolume":      50
-     }
-  ]
+  "accessories": [
+       {
+         "accessory":      "devialet-bridge",
+         "name":           "Phantom Living Room",
+         "host":           "192.168.1.15"
+         "maxVolume":      50
+       }
+    ]
 ```
 
 

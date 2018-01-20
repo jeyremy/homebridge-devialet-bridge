@@ -53,3 +53,11 @@ Example:
  `` homebridge-devialet-bridge was written by GeekBrothers (Jeyremy and the contribution of Steven)``
 
  `` homebridge-marantz-volume was written by Robert Vorthman (thanks!) phantom-bridge was written by DA2001 ( thanks ! )``
+ 
+ 
+ ## Donation
+If this project help you, you can give us a cup of coffee :) 
+
+[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/jeyremy)
+
+ 

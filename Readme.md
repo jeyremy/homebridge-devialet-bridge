@@ -7,11 +7,7 @@ homebridge-plugin for Devialet Phantom with Dialog.
 1) install HomeBridge :  `` sudo npm install -g homebridge `` 
 2) In order to the Plugin to work, please enable in the Spark application UPNP on your Dialog. please follow this link : 
 https://help.devialet.com/hc/en-us/articles/115004436969-How-Can-I-Use-UPNP-with-my-Phantom-
-
-# Optionnal (if depedencies faild to install) 
-3) ```install npm request : sudo npm install -g request```
-4) ```install npm xml2js : sudo npm install -g xml2js```
-5) ```install npm node-ssdp : sudo npm install -g node-ssdp```
+ 
 
 # Installation
 

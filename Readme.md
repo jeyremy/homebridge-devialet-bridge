@@ -1,4 +1,4 @@
-# Homebridge-Phantom-Devialet-Bridge
+# Homebridge-Devialet-Bridge
 
 homebridge-plugin for Devialet Phantom with Dialog. Inspire from the initial homebridge-marantz-volume homebridge plugin ( https://github.com/stfnhmplr/homebridge-marantz-volume ) and phantom-bridge ( https://github.com/da2001/phantom-bridge ): Thanks to them, we'll have just a few work to do in order to manage Phantom devialet Volume via Dialog.
 

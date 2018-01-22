@@ -20,7 +20,6 @@ function ReceiverVolume(log, config) {
     this.name = config['name'] || "Devialet Bridge";
     this.maxVolume = config['maxVolume'] || 70;
     this.host = confHost  = config['host'];
-    this.mapMaxVolumeTo100 = !!config['mapMaxVolumeTo100'];
     this.lastVolume = 0;
     
     //cap maxVolume.  Devialet percentage maxes at 98 in receiver settings
@@ -140,6 +139,7 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
 }
 
 ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
+    if(newLevel>this.maxVolume)newLevel = this.maxVolume;
     this.setControl('Volume', newLevel, callback);
 }
 

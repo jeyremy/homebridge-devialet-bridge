@@ -144,7 +144,69 @@ ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
 }
 
 ReceiverVolume.prototype.getBrightness = function(callback) {
-    callback(null, this.lastVolume); //For now, get current volume is las volume.
+
+     var status ='';
+
+    if(!actualDevice["host"])
+    {
+          status =  "Sorry: Speakers not found yet. Try later..";
+    }
+    else
+    {
+          status = "Get Volume.";
+
+        var xml = '<s:Envelope s:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/" xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">'+
+            '<s:Body>'+
+            '<u:GetVolume xmlns:u="urn:schemas-upnp-org:service:RenderingControl:1">'+
+            '<InstanceID>0</InstanceID>'+
+            '<Channel>Master</Channel>'+
+            '</u:GetVolume>'+
+            '</s:Body>'+
+            '</s:Envelope>';
+
+        var http_options = {
+            hostname: actualDevice["host"],
+            port: actualDevice["port"], //a vérifier car pas sur.
+            path: '/Control/LibRygelRenderer/RygelRenderingControl',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'soapaction': 'urn:schemas-upnp-org:service:RenderingControl:1#GetVolume',
+                'Content-Length': xml.length
+            }
+        }
+
+        var req = http.request(http_options,  function(res) {
+            var data = ""
+            res.setEncoding('utf8');
+            res.on('data', function (chunk) { data += chunk });
+            res.on('end', function() {
+                 this.log.debug("finished request", "data length:", data.length);
+
+                //console.log(data);
+                if(data.indexOf("<CurrentVolume>") > -1 && data.indexOf("</CurrentVolume>")) {
+                    var from = data.indexOf("<CurrentVolume>") +15;
+                    var to = data.indexOf("</CurrentVolume>") ;
+                    var currentVolume  =  data.substr(from,to-from);
+                    this.log.info(currentVolume);
+                    callback(null,currentVolume);
+                }
+            });
+            res.on('error', (e) => {
+                this.log.warn(`problem with response: ${e.message}`);
+                callback(e, this.lastVolume);
+            });
+        });
+       req.on('error', (e) => {
+            this.log.warn(`problem with request: ${e.message}`);
+           callback(e, this.lastVolume);
+          //  callback(e);
+        });
+        req.write(xml);
+        req.end();
+        this.log.info(status);
+    }
+    this.log.info(status);
 }
 
 ReceiverVolume.prototype.getServices = function() {
@@ -152,7 +214,8 @@ ReceiverVolume.prototype.getServices = function() {
     
     lightbulbService
     .addCharacteristic(new Characteristic.Brightness())
-    .on('set', this.setBrightness.bind(this));
+    .on('set', this.setBrightness.bind(this))
+    .on('get', this.getBrightness.bind(this));
     
     return [lightbulbService];
 }

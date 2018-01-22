@@ -25,7 +25,7 @@
     "request": "2.x",
     "xml2js": "0.x"
   },
-  "author": "Robert Vorthman",
+  "author": "Jeremy Luisetti",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/jeyremy/homebridge-devialet-bridge/issues"

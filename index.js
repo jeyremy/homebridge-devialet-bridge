@@ -17,12 +17,9 @@ module.exports = function(homebridge) {
 function ReceiverVolume(log, config) {
     this.log = log;
     logBridge = this.log;
-    this.name = config['name'] || "Receiver Volume";
+    this.name = config['name'] || "Devialet Bridge";
     this.maxVolume = config['maxVolume'] || 70;
     this.host = confHost  = config['host'];
-    this.zone = (config['zone'] || 1) | 0; // default to 1, and make sure its an integer
-    this.controlPower = !!config['controlPower']; // default to false, and make sure its a bool
-    this.controlMute = !!config['controlMute'] && this.controlPower === false;
     this.mapMaxVolumeTo100 = !!config['mapMaxVolumeTo100'];
     this.lastVolume = 0;
     
@@ -51,17 +48,15 @@ client.on('response', function inResponse(headers, code, rinfo) {
           
           if(rinfo.address == confHost)
           {
-          
-          actualDevice["host"] = parseUri(headers.LOCATION).host;
-          actualDevice["port"] = parseUri(headers.LOCATION).port;
-          logBridge.info("Devialet Bridge found at "+actualDevice["host"]+":"+actualDevice["port"]);
+              actualDevice["host"] = parseUri(headers.LOCATION).host;
+              actualDevice["port"] = parseUri(headers.LOCATION).port;
+              logBridge.info("Devialet Bridge found at "+actualDevice["host"]+":"+actualDevice["port"]);
           }
-          })
+ })
 
 function searchSpeaker()
 {
     logBridge.info("Seraching for Devialet bridge");
-    
     client.search('urn:schemas-upnp-org:service:RenderingControl:2');
     
     setTimeout(function() {
@@ -83,7 +78,7 @@ ReceiverVolume.prototype.getStatus = function(callback) {
                             callback(result.item);
                             }.bind(this));
                 }else{
-                callback(null);
+                  callback(null);
                 }
                 }.bind(this));
 }
@@ -121,26 +116,24 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
         }
         
         var req = http.request(http_options, (res) => {
-                               res.setEncoding('utf8');
-                               //     console.log("statuscode  == "+res.statusCode)    ;
-                               if ( res.statusCode == 200) {
-                               this.lastVolume = val;
-                               callback(null);
-                               } else {
-                               callback(res.statusCode);
-                               }
-                               });
+           res.setEncoding('utf8');
+                if ( res.statusCode == 200) {
+                   this.lastVolume = val;
+                   callback(null);
+               } else {
+                   callback(res.statusCode);
+               }
+           });
         req.on('error', (e) => {
-               console.log(`problem with request: ${e.message}`);
+                this.log.warn(`problem with request: ${e.message}`);
                callback(e);
-               });
-        
-        //  req.bind(this); //not sure.
+         });
+
         req.write(xml);
         req.end();
-        console.log(status);
+        this.log.info(status);
     }
-    console.log(status);
+    this.log.info(status);
     
     
     
@@ -151,9 +144,7 @@ ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
 }
 
 ReceiverVolume.prototype.getBrightness = function(callback) {
-   
-    callback(null, this.lastVolume); //en attendant mieux
-    
+    callback(null, this.lastVolume); //For now, get current volume is las volume.
 }
 
 ReceiverVolume.prototype.getServices = function() {
@@ -184,16 +175,16 @@ function parseUri (str) {
 };
 
 parseUri.options = {
-strictMode: false,
-key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
-q:   {
-name:   "queryKey",
-parser: /(?:^|&)([^&=]*)=?([^&]*)/g
-},
-parser: {
-strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
-loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
-}
+    strictMode: false,
+    key: ["source","protocol","authority","userInfo","user","password","host","port","relative","path","directory","file","query","anchor"],
+    q:   {
+        name:   "queryKey",
+        parser: /(?:^|&)([^&=]*)=?([^&]*)/g
+    },
+    parser: {
+        strict: /^(?:([^:\/?#]+):)?(?:\/\/((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?))?((((?:[^?#\/]*\/)*)([^?#]*))(?:\?([^#]*))?(?:#(.*))?)/,
+        loose:  /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
+    }
 };
 
 

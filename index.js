@@ -18,7 +18,7 @@ function ReceiverVolume(log, config) {
     this.log = log;
     logBridge = this.log;
     this.name = config['name'] || "Devialet Bridge";
-    this.maxVolume = config['maxVolume'] || 70;
+    this.maxVolume = config['maxVolume'] || 70; // prevent for 100% volume
     this.host = confHost  = config['host'];
     this.lastVolume = 0;
     
@@ -33,10 +33,7 @@ function ReceiverVolume(log, config) {
     }
     
     searchSpeaker();
-    
-    if (!this.controlPower) {
-        this.fakePowerState = 1; //default to on so that brightness will update in HomeKit apps
-    }
+
     
 }
 
@@ -77,6 +74,7 @@ ReceiverVolume.prototype.getStatus = function(callback) {
                             callback(result.item);
                             }.bind(this));
                 }else{
+                  reSearchPort();
                   callback(null);
                 }
                 }.bind(this));
@@ -120,12 +118,16 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
                    this.lastVolume = val;
                    callback(null);
                } else {
+                   reSearchPort();
                    callback(res.statusCode);
                }
            });
         req.on('error', (e) => {
                 this.log.warn(`problem with request: ${e.message}`);
-               callback(e);
+                reSearchPort();
+
+                callback(e);
+
          });
 
         req.write(xml);
@@ -133,14 +135,18 @@ ReceiverVolume.prototype.setControl = function (control, val, callback) {
         this.log.info(status);
     }
     this.log.info(status);
-    
-    
-    
+
 }
 
 ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
     if(newLevel>this.maxVolume)newLevel = this.maxVolume;
     this.setControl('Volume', newLevel, callback);
+}
+
+function reSearchPort(){
+    actualDevice["host"] = null;
+    actualDevice["port"] = null;
+    searchSpeaker();
 }
 
 ReceiverVolume.prototype.getBrightness = function(callback) {
@@ -177,28 +183,36 @@ ReceiverVolume.prototype.getBrightness = function(callback) {
         }
 
         var req = http.request(http_options,  function(res) {
-            var data = ""
+            var data = "";
             res.setEncoding('utf8');
+
+            if ( res.statusCode != 200) {
+                //there is some problem here, maybe re-try to search for port.
+                reSearchPort();
+                callback(res.statusCode);
+                return;
+            }
+
             res.on('data', function (chunk) { data += chunk });
             res.on('end', function() {
-                 this.log.debug("finished request", "data length:", data.length);
 
-                //console.log(data);
                 if(data.indexOf("<CurrentVolume>") > -1 && data.indexOf("</CurrentVolume>")) {
                     var from = data.indexOf("<CurrentVolume>") +15;
                     var to = data.indexOf("</CurrentVolume>") ;
                     var currentVolume  =  data.substr(from,to-from);
-                    this.log.info(currentVolume);
+                   // this.log.info(currentVolume);
                     callback(null,currentVolume);
                 }
-            });
+
+            }  );
             res.on('error', (e) => {
                 this.log.warn(`problem with response: ${e.message}`);
                 callback(e, this.lastVolume);
             });
         });
        req.on('error', (e) => {
-            this.log.warn(`problem with request: ${e.message}`);
+           this.log.warn(`problem with request: ${e.message}`);
+           reSearchPort();
            callback(e, this.lastVolume);
           //  callback(e);
         });

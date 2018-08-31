@@ -8,6 +8,7 @@ http = require('http'), url = require('url'), request = require('request');
 var discoverInterval = 10000; //milliseconds
 var confHost = "127.0.0.1";
 var logBridge ;
+var lightbulbService;
 module.exports = function(homebridge) {
     Service = homebridge.hap.Service;
     Characteristic = homebridge.hap.Characteristic;
@@ -19,7 +20,7 @@ function ReceiverVolume(log, config) {
     logBridge = this.log;
     this.name = config['name'] || "Devialet Bridge";
     this.maxVolume = config['maxVolume'] || 70; // prevent for 100% volume
-    this.defaultVolume = config['defaultVolume'] || 35; // prevent for 100% volume
+    this.defaultVolume = config['defaultVolume'] || 35; // prevent for 100% at start-up
     this.host = confHost  = config['host'];
     this.lastVolume = 0;
 
@@ -142,13 +143,18 @@ ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
     if(newLevel>this.maxVolume)newLevel = this.maxVolume;
     this.setControl('Volume', newLevel, callback);
 }
-ReceiverVolume.prototype.setPowerStateOn = function(callback) {
-    newLevel = this.defaultVolume;
-    this.setControl('Volume', newLevel, callback);
-}
-ReceiverVolume.prototype.setPowerStateOff = function(callback) {
-    newLevel = 0;
-    this.setControl('Volume', newLevel, callback);
+ReceiverVolume.prototype.setPowerState = function(On, callback) {
+   if(On && this.lastVolume === 0){ //if Lastvolume Equals 0 it mean you just turn On the device. so Default volume.
+       newLevel = this.defaultVolume;
+       this.setControl('Volume', newLevel, callback);
+       this.lightbulbService.getCharacteristic(Characteristic.Brightness).getValue()
+   }else if(!On){
+       newLevel = 0;
+       this.setControl('Volume', newLevel, callback);
+   }else{
+       callback();
+   }
+
 }
 
 function reSearchPort(){
@@ -232,25 +238,19 @@ ReceiverVolume.prototype.getBrightness = function(callback) {
 }
 
 ReceiverVolume.prototype.getServices = function() {
-    var lightbulbService = new Service.Lightbulb(this.name);
+     this.lightbulbService = new Service.Lightbulb(this.name);
 
-    lightbulbService
+    this.lightbulbService
         .addCharacteristic(new Characteristic.Brightness())
         .on('set', this.setBrightness.bind(this))
         .on('get', this.getBrightness.bind(this));
 
-    lightbulbService
+    this.lightbulbService
         .getCharacteristic(Characteristic.On)
-        .on('set', this.setPowerStateOn.bind(this) );
+        .on('set', this.setPowerState.bind(this) );
 
-    lightbulbService
-        .getCharacteristic(Characteristic.Off)
-        .on('set', this.setPowerStateOff.bind(this) );
-
-
-    return [lightbulbService];
+    return [this.lightbulbService];
 }
-
 
 function parseUri (str) {
     var    o   = parseUri.options,

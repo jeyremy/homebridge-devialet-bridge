@@ -1,6 +1,6 @@
 {
   "name": "homebridge-devialet-bridge",
-  "version": "2.2.0",
+  "version": "2.2.4",
   "description": "Homebridge plugin to control Devialet receiver volume with Siri commands",
   "main": "index.js",
   "repository": {

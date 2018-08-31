@@ -34,7 +34,8 @@ Example:
          "accessory":      "devialet-bridge",
          "name":           "Phantom Living Room",
          "host":           "192.168.1.15",
-         "maxVolume":      50
+         "maxVolume":      50,
+         "defaultVolume": 35
        }
     ]
 ```
@@ -46,7 +47,8 @@ Example:
   - Name :  any name you want to
   - host : must be the ip adress of your Phantom Bridge (static ip, or force by router)
   - maxVolume : number between 1 to 100 but please keep in mind that 100 is realy loud an siri can misunderstand something 
-  
+  - defaultVolume : the volume you wnat when turn on the devialet ; number between 1 to 100 but please keep in mind that 100 is realy loud.
+
  ` If you are interested in setting the volume of your Phantom(s) with Siri, Only remember to not tell Siri "Set the light in the Living room to 100 %" ;)
 
  `` We also suggest, in homekit, to put your Devialet Light switch in a different Room in order to not have bad surprise setting something like "Turn on all light in the Living Room" :)

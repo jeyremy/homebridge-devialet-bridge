@@ -19,6 +19,7 @@ function ReceiverVolume(log, config) {
     logBridge = this.log;
     this.name = config['name'] || "Devialet Bridge";
     this.maxVolume = config['maxVolume'] || 70; // prevent for 100% volume
+    this.defaultVolume = config['defaultVolume'] || 35; // prevent for 100% volume
     this.host = confHost  = config['host'];
     this.lastVolume = 0;
     
@@ -143,6 +144,14 @@ ReceiverVolume.prototype.setBrightness = function(newLevel, callback) {
     this.setControl('Volume', newLevel, callback);
 }
 
+ReceiverVolume.prototype.setPowerStateOn = function(callback) {
+    newLevel = this.defaultVolume;
+    this.setControl('Volume', newLevel, callback);
+}
+ReceiverVolume.prototype.setPowerStateOff = function(callback) {
+    newLevel = 0;
+    this.setControl('Volume', newLevel, callback);
+}
 function reSearchPort(){
     actualDevice["host"] = null;
     actualDevice["port"] = null;
@@ -230,7 +239,17 @@ ReceiverVolume.prototype.getServices = function() {
     .addCharacteristic(new Characteristic.Brightness())
     .on('set', this.setBrightness.bind(this))
     .on('get', this.getBrightness.bind(this));
-    
+
+
+    lightbulbService
+        .getCharacteristic(Characteristic.On)
+        .on('set', this.setPowerStateOn.bind(this) );
+
+    lightbulbService
+        .getCharacteristic(Characteristic.Off)
+        .on('set', this.setPowerStateOff.bind(this) );
+
+
     return [lightbulbService];
 }
 
